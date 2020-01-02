@@ -57,4 +57,19 @@ function update(time = 0) {
     requestAnimationFrame(update);
 }
 
+function playerDrop() {
+    player.pos.y++;
+    dropCounter = 0;
+}
+
+document.addEventListener('keydown', e => {
+    if (e.key === "ArrowLeft") {
+        player.pos.x--;
+    } else if (e.key === "ArrowRight") {
+        player.pos.x++;
+    } else if (e.key === "ArrowDown") {
+        playerDrop();
+    }
+})
+
 update();
