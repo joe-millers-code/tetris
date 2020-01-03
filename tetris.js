@@ -7,6 +7,7 @@ context.fillStyle = '#000';
 context.fillRect(0, 0, canvas.width, canvas.height)
 
 function arenaSweep() {
+    let rowCount = 1;
     outer: for (let y = arena.length - 1; y > 0; --y){
         for (let x = 0; x < arena[y].length; ++x) {
             if (arena[y][x] === 0) {
@@ -16,6 +17,9 @@ function arenaSweep() {
         const emptyRow = arena.splice(y, 1)[0].fill(0);
         arena.unshift(emptyRow);
         ++y;
+
+        player.score += rowCount * 10;
+        rowCount *= 2;
     }
 }
 
@@ -32,8 +36,9 @@ function collisonDetector(arena, player) {
 }
 
 const player = {
-    pos:{x:5, y:5},
-    matrix: createPiece('S'),
+    pos:{x:0, y:0},
+    matrix: null,
+    score: 0,
 }
 
 function createMatrix(w, h) {
@@ -140,6 +145,7 @@ function playerDrop() {
         merge(arena, player);
         playerReset();
         arenaSweep();
+        updateScore();
     }
     dropCounter = 0;
 }
@@ -159,6 +165,8 @@ function playerReset() {
 
     if(collisonDetector(arena, player)) {
         arena.forEach(row => row.fill(0));
+        player.score = 0;
+        updateScore();
     }
 }
 
@@ -215,6 +223,10 @@ function update(time = 0) {
     requestAnimationFrame(update);
 }
 
+function updateScore(){
+    document.getElementById('score').innerText = player.score;
+}
+
 const arena = createMatrix(12, 20);
 
 document.addEventListener('keydown', e => {
@@ -231,4 +243,6 @@ document.addEventListener('keydown', e => {
     }
 })
 
+playerReset();
+updateScore();
 update();
