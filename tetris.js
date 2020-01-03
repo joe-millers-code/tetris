@@ -1,53 +1,51 @@
 const canvas = document.getElementById('tetris');
 const context = canvas.getContext('2d');
+    context.scale(20, 20);
+const arena = createArena(12, 20);
 
-context.scale(20, 20);
+// -------------------------------------Game Board
+function draw() {
+    context.fillStyle = '#000';
+    context.fillRect(0, 0, canvas.width, canvas.height);
 
-context.fillStyle = '#000';
-context.fillRect(0, 0, canvas.width, canvas.height)
-
-function arenaSweep() {
-    let rowCount = 1;
-    outer: for (let y = arena.length - 1; y > 0; --y){
-        for (let x = 0; x < arena[y].length; ++x) {
-            if (arena[y][x] === 0) {
-                continue outer;
-            }
-        }
-        const emptyRow = arena.splice(y, 1)[0].fill(0);
-        arena.unshift(emptyRow);
-        ++y;
-
-        player.score += rowCount * 10;
-        rowCount *= 2;
-    }
+    drawMatrix(arena, {x:0, y:0});
+    drawMatrix(player.matrix, player.pos);
 }
 
-function collisonDetector(arena, player) {
-    const [m, o] = [player.matrix, player.pos];
-    for (let y = 0; y < m.length; ++y) {
-        for (let x = 0; x < m[y].length; ++x) {
-            if (m[y][x] !== 0 && (arena[y + o.y] && arena[y + o.y][x + o.x]) !== 0) {
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
-const player = {
-    pos:{x:0, y:0},
-    matrix: null,
-    score: 0,
-}
-
-function createMatrix(w, h) {
+function createArena(w, h) {
     const matrix = [];
-    while (h-- ) {
+    while (h--) {
         matrix.push(new Array(w).fill(0));
     }
     return matrix;
 }
+
+function drawMatrix(matrix, offset) {
+    matrix.forEach((row, y) => {
+        row.forEach((value, x) => {
+            if(value !== 0) {
+                context.fillStyle = colors[value];
+                context.fillRect(
+                                x + offset.x,
+                                y + offset.y, 
+                                1, 1
+                )
+            }
+        });
+    });
+}
+
+// -----------------------------------------Game Pieces
+const colors = [
+    null, 
+    'red',
+    'blue',
+    'violet',
+    'green',
+    'orange',
+    'purple',
+    'pink'
+]
 
 function createPiece(type){
     if (type === 'T') {
@@ -93,49 +91,65 @@ function createPiece(type){
         ]
     }
 }
+ //----------------------------------------------------------------------->>>bugs on the I rotate.
 
-const colors = [
-    null, 
-    'red',
-    'blue',
-    'violet',
-    'green',
-    'orange',
-    'purple',
-    'pink'
-]
+//--------------------------------------------Game Controls
 
-function draw() {
-    context.fillStyle = '#000';
-    context.fillRect(0, 0, canvas.width, canvas.height);
+document.addEventListener('keydown', e => {
+    if (e.key === "ArrowLeft") {
+        playerMove(-1);
+    } else if (e.key === "ArrowRight") {
+        playerMove(1);
+    } else if (e.key === "ArrowDown") {
+        playerDrop();
+    } else if (e.key === 'q') {
+        rotateControl(-1)
+    } else if (e.key === 'w') {
+        rotateControl(1)
+    }
+})
 
-    drawMatrix(arena, {x:0, y:0})
-    drawMatrix(player.matrix, player.pos);
+function rotate(matrix, dir) {
+    for (let y = 0; y < matrix.length; ++y) {
+        for (let x = 0; x < y; ++x) {
+            [
+                matrix[x][y],
+                matrix[y][x]
+            ] = [
+                matrix[y][x],
+                matrix[x][y]
+            ];
+        }
+    }
+
+    if(dir > 0) {
+        matrix.forEach(row => row.reverse());
+    } else {
+        matrix.reverse();
+    }
 }
 
-function drawMatrix(matrix, offset) {
-    matrix.forEach((row, y) => {
-        row.forEach((value, x) => {
-            if(value !== 0) {
-                context.fillStyle = colors[value];
-                context.fillRect(
-                                x + offset.x,
-                                y + offset.y, 
-                                1, 1
-                )
-            }
-        });
-    });
+function rotateControl(dir) {
+    const pos = player.pos.x
+    let offset = 1;
+    rotate(player.matrix, dir)
+    while (collisonDetector(arena, player)) {
+        player.pos.x += offset;
+        offset = -(offset + (offset > 0 ? 1 : -1));
+        if ( offset > player.matrix[0].length) {
+            rotate(player.matrix, -dir);
+            player.pos.x = pos
+            return;
+        }
+    }
 }
 
-function merge(arena, player) {
-    player.matrix.forEach((row, y) => {
-        row.forEach((value, x) => {
-            if (value !== 0) {
-                arena[y + player.pos.y][x + player.pos.x] = value;
-            }
-        });
-    });
+//-------------------------------------------------Player Mechanics
+
+const player = {
+    pos:{x:0, y:0},
+    matrix: null,
+    score: 0,
 }
 
 function playerDrop() {
@@ -144,7 +158,7 @@ function playerDrop() {
         player.pos.y--;
         merge(arena, player);
         playerReset();
-        arenaSweep();
+        rowClear();
         updateScore();
     }
     dropCounter = 0;
@@ -170,39 +184,53 @@ function playerReset() {
     }
 }
 
-function playerRotate(dir) {
-    const pos = player.pos.x
-    let offset = 1;
-    rotate(player.matrix, dir)
-    while (collisonDetector(arena, player)) {
-        player.pos.x += offset;
-        offset = -(offset + (offset > 0 ? 1 : -1));
-        if ( offset > player.matrix[0].length) {
-            rotate(player.matrix, -dir);
-            player.pos.x = pos
-            return;
+// ----------------------------------------------------Game Mechanics
+
+function merge(arena, player) {
+    player.matrix.forEach((row, y) => {
+        row.forEach((value, x) => {
+            if (value !== 0) {
+                arena[y + player.pos.y][x + player.pos.x] = value;
+            }
+        });
+    });
+}
+
+function collisonDetector(arena, player) {
+    // const [m, o] = [player.matrix, player.pos];
+    const m = player.matrix;
+    const o = player.pos
+    for (let y = 0; y < m.length; ++y) {
+        for (let x = 0; x < m[y].length; ++x) {
+            if (m[y][x] !== 0 && 
+                (arena[y + o.y] && 
+                arena[y + o.y][x + o.x]) !== 0) {
+                return true;
+            }
         }
+    }
+    return false;
+}
+
+function rowClear() {
+    let rowCount = 1;
+    outer: for (let y = arena.length - 1; y > 0; --y){
+        for (let x = 0; x < arena[y].length; ++x) {
+            if (arena[y][x] === 0) {
+                continue outer;
+            }
+        }
+        const emptyRow = arena.splice(y, 1)[0].fill(0);
+        arena.unshift(emptyRow);
+        ++y;
+
+        player.score += rowCount * 10;
+        rowCount *= 2;
     }
 }
 
-function rotate(matrix, dir) {
-    for (let y = 0; y < matrix.length; ++y) {
-        for (let x = 0; x < y; ++x) {
-            [
-                matrix[x][y],
-                matrix[y][x]
-            ] = [
-                matrix[y][x],
-                matrix[x][y]
-            ];
-        }
-    }
-
-    if(dir > 0) {
-        matrix.forEach(row => row.reverse());
-    } else {
-        matrix.reverse();
-    }
+function updateScore(){
+    document.getElementById('score').innerText = player.score;
 }
 
 let dropCounter = 0;
@@ -211,37 +239,17 @@ let lastTime = 0;
 
 function update(time = 0) {
     const deltaTime = time - lastTime;
-    lastTime = time;
     dropCounter += deltaTime;
-
+    
     if (dropCounter > dropInterval) {
-        player.pos.y++;
-        dropCounter = 0;
+        playerDrop();
     }
+    
+    lastTime = time;
 
     draw();
     requestAnimationFrame(update);
 }
-
-function updateScore(){
-    document.getElementById('score').innerText = player.score;
-}
-
-const arena = createMatrix(12, 20);
-
-document.addEventListener('keydown', e => {
-    if (e.key === "ArrowLeft") {
-        playerMove(-1);
-    } else if (e.key === "ArrowRight") {
-        playerMove(1);
-    } else if (e.key === "ArrowDown") {
-        playerDrop();
-    } else if (e.keyCode === 81) {
-        playerRotate(-1)
-    } else if (e.keyCode === 87) {
-        playerRotate(1)
-    }
-})
 
 playerReset();
 updateScore();
