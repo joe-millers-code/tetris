@@ -6,6 +6,19 @@ context.scale(20, 20);
 context.fillStyle = '#000';
 context.fillRect(0, 0, canvas.width, canvas.height)
 
+function arenaSweep() {
+    outer: for (let y = arena.length - 1; y > 0; --y){
+        for (let x = 0; x < arena[y].length; ++x) {
+            if (arena[y][x] === 0) {
+                continue outer;
+            }
+        }
+        const emptyRow = arena.splice(y, 1)[0].fill(0);
+        arena.unshift(emptyRow);
+        ++y;
+    }
+}
+
 function collisonDetector(arena, player) {
     const [m, o] = [player.matrix, player.pos];
     for (let y = 0; y < m.length; ++y) {
@@ -40,41 +53,52 @@ function createPiece(type){
         ];
     } else if (type === "O") {
         return [
-            [1, 1],
-            [1, 1]
+            [2, 2],
+            [2, 2]
         ]
     } else if (type === "L") {
         return [
-            [0, 1, 0],
-            [0, 1, 0],
-            [0, 1, 1]
+            [0, 3, 0],
+            [0, 3, 0],
+            [0, 3, 3]
         ]
     } else if (type === "J") {
         return [
-            [0, 1, 0],
-            [0, 1, 0],
-            [1, 1, 0]
+            [0, 4, 0],
+            [0, 4, 0],
+            [4, 4, 0]
         ]
     } else if (type === "I") {
         return [
-            [0, 1, 0, 0],
-            [0, 1, 0, 0],
-            [0, 1, 0, 0]
+            [0, 5, 0, 0],
+            [0, 5, 0, 0],
+            [0, 5, 0, 0]
         ]
     } else if (type === "S") {
         return [
-            [0, 1, 1],
-            [1, 1, 0],
+            [0, 6, 6],
+            [6, 6, 0],
             [0, 0, 0]
         ]
     } else if (type === "Z") {
         return [
-            [1, 1, 0],
-            [0, 1, 1],
+            [7, 7, 0],
+            [0, 7, 7],
             [0, 0, 0]
         ]
     }
 }
+
+const colors = [
+    null, 
+    'red',
+    'blue',
+    'violet',
+    'green',
+    'orange',
+    'purple',
+    'pink'
+]
 
 function draw() {
     context.fillStyle = '#000';
@@ -88,7 +112,7 @@ function drawMatrix(matrix, offset) {
     matrix.forEach((row, y) => {
         row.forEach((value, x) => {
             if(value !== 0) {
-                context.fillStyle = 'red';
+                context.fillStyle = colors[value];
                 context.fillRect(
                                 x + offset.x,
                                 y + offset.y, 
@@ -115,6 +139,7 @@ function playerDrop() {
         player.pos.y--;
         merge(arena, player);
         playerReset();
+        arenaSweep();
     }
     dropCounter = 0;
 }
