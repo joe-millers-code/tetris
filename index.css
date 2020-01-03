@@ -10,3 +10,8 @@ body {
     border: solid 5px white;
     height: 90vh;
 }
+
+#controls {
+    font-size: 0.5em;
+    position: relative;
+}
