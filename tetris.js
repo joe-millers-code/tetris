@@ -98,15 +98,15 @@ function createPiece(type){
 
 document.addEventListener('keydown', e => {
     if (e.key === "ArrowLeft") {
-        playerMove(-1);
+        player.move(-1);
     } else if (e.key === "ArrowRight") {
-        playerMove(1);
+        player.move(1);
     } else if (e.key === "ArrowDown") {
-        playerDrop();
+        player.drop();
     } else if (e.key === 'q') {
-        rotateControl(-1)
+        player.rotate(-1)
     } else if (e.key === 'w') {
-        rotateControl(1)
+        player.rotate(1)
     }
 })
 
@@ -130,47 +130,10 @@ function rotate(matrix, dir) {
     }
 }
 
-function rotateControl(dir) {
-    const pos = player.pos.x
-    let offset = 1;
-    rotate(player.matrix, dir)
-    while (collisonDetector(arena, player)) {
-        player.pos.x += offset;
-        offset = -(offset + (offset > 0 ? 1 : -1));
-        if ( offset > player.matrix[0].length) {
-            rotate(player.matrix, -dir);
-            player.pos.x = pos
-            return;
-        }
-    }
-}
-
 //-------------------------------------------------Player Mechanics
 
-const player = {
-    pos:{x:0, y:0},
-    matrix: null,
-    score: 0,
-}
+const player = new Player();
 
-function playerDrop() {
-    player.pos.y++;
-    if (collisonDetector(arena, player)) {
-        player.pos.y--;
-        merge(arena, player);
-        playerReset();
-        rowClear();
-        updateScore();
-    }
-    dropCounter = 0;
-}
-
-function playerMove(dir){
-    player.pos.x += dir;
-    if(collisonDetector(arena, player)) {
-        player.pos.x -= dir;
-    }
-}
 
 function playerReset() {
     const pieces = "ILJOTSZ"
@@ -234,19 +197,14 @@ function updateScore(){
     document.getElementById('score').innerText = player.score;
 }
 
-let dropCounter = 0;
-let dropInterval = 1000;
+
 let lastTime = 0;
 
 function update(time = 0) {
     const deltaTime = time - lastTime;
-    dropCounter += deltaTime;
-    
-    if (dropCounter > dropInterval) {
-        playerDrop();
-    }
-    
     lastTime = time;
+
+    player.update(deltaTime)
 
     draw();
     requestAnimationFrame(update);
