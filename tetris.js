@@ -1,23 +1,16 @@
 const canvas = document.getElementById('tetris');
 const context = canvas.getContext('2d');
     context.scale(20, 20);
-const arena = createArena(12, 20);
+
+const arena = new Arena(12, 20);
 
 // -------------------------------------Game Board
 function draw() {
     context.fillStyle = '#000';
     context.fillRect(0, 0, canvas.width, canvas.height);
 
-    drawMatrix(arena, {x:0, y:0});
+    drawMatrix(arena.gameGrid, {x:0, y:0});
     drawMatrix(player.matrix, player.pos);
-}
-
-function createArena(w, h) {
-    const matrix = [];
-    while (h--) {
-        matrix.push(new Array(w).fill(0));
-    }
-    return matrix;
 }
 
 function drawMatrix(matrix, offset) {
@@ -116,7 +109,7 @@ const player = new Player();
 
 // ----------------------------------------------------Game Mechanics
 
-function merge(arena, player) {
+function merge(gameGrid, player) {
     player.matrix.forEach((row, y) => {
         row.forEach((value, x) => {
             if (value !== 0) {
@@ -140,23 +133,6 @@ function collisonDetector(arena, player) {
         }
     }
     return false;
-}
-
-function rowClear() {
-    let rowCount = 1;
-    outer: for (let y = arena.length - 1; y > 0; --y){
-        for (let x = 0; x < arena[y].length; ++x) {
-            if (arena[y][x] === 0) {
-                continue outer;
-            }
-        }
-        const emptyRow = arena.splice(y, 1)[0].fill(0);
-        arena.unshift(emptyRow);
-        ++y;
-
-        player.score += rowCount * 10;
-        rowCount *= 2;
-    }
 }
 
 function updateScore(){

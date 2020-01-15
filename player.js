@@ -56,9 +56,9 @@ class Player {
         this.pos.y++;
         if (collisonDetector(arena, this)) {
             this.pos.y--;
-            merge(arena, this);
+            merge(arena.gameGrid, this);
             this.reset();
-            rowClear();
+            arena.rowClear();
             updateScore();
         }
         this.dropCounter = 0;
@@ -76,7 +76,7 @@ class Player {
         const pieces = "ILJOTSZ"
         this.matrix = createPiece(pieces[pieces.length * Math.random() | 0]);
         this.pos.y = 0;
-        this.pos.x = (arena[0].length / 2 | 0) - (this.matrix[0].length / 2 | 0);
+        this.pos.x = (arena.gameGrid[0].length / 2 | 0) - (this.matrix[0].length / 2 | 0);
     
         if(collisonDetector(arena, this)) {
             arena.forEach(row => row.fill(0));
