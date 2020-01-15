@@ -79,7 +79,7 @@ class Player {
         this.pos.x = (arena.gameGrid[0].length / 2 | 0) - (this.matrix[0].length / 2 | 0);
     
         if(collisonDetector(arena, this)) {
-            arena.forEach(row => row.fill(0));
+            arena.clear()
             player.score = 0;
             updateScore();
         }

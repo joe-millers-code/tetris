@@ -23,4 +23,8 @@ class Arena {
             rowCount *= 2;
         }
     }
+
+    clear() {
+        this.gameGrid.forEach(row => row.fill(0));
+    }
 }
