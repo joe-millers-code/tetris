@@ -1,5 +1,8 @@
 class Player {
-    constructor() {
+    constructor(tetris) {
+
+        this.tetris = tetris;
+        this.arena = tetris.arena;
 
         this.dropCounter = 0;
         this.dropInterval = 1000;
@@ -7,12 +10,14 @@ class Player {
         this.pos = {x: 0, y: 0};
         this.matrix = null;
         this.score = 0;
+
+        this.reset();
         
     }
 
     move(dir){
         this.pos.x += dir;
-        if(collisonDetector(arena, this)) {
+        if(this.arena.collisonDetector(this)) {
             this.pos.x -= dir;
         }
     }
@@ -21,7 +26,7 @@ class Player {
         const pos = this.pos.x
         let offset = 1;
         this.actualMovingPieces(this.matrix, dir)
-        while (collisonDetector(arena, this)) {
+        while (this.arena.collisonDetector(this)) {
             this.pos.x += offset;
             offset = -(offset + (offset > 0 ? 1 : -1));
             if ( offset > this.matrix[0].length) {
@@ -54,11 +59,11 @@ class Player {
 
     drop() {
         this.pos.y++;
-        if (collisonDetector(arena, this)) {
+        if (this.arena.collisonDetector(this)) {
             this.pos.y--;
-            arena.merge(this);
+            this.arena.merge(this);
             this.reset();
-            arena.rowClear();
+            this.arena.rowClear();
             updateScore();
         }
         this.dropCounter = 0;
@@ -76,10 +81,10 @@ class Player {
         const pieces = "ILJOTSZ"
         this.matrix = createPiece(pieces[pieces.length * Math.random() | 0]);
         this.pos.y = 0;
-        this.pos.x = (arena.gameGrid[0].length / 2 | 0) - (this.matrix[0].length / 2 | 0);
+        this.pos.x = (this.arena.gameGrid[0].length / 2 | 0) - (this.matrix[0].length / 2 | 0);
     
-        if(collisonDetector(arena, this)) {
-            arena.clear()
+        if(this.arena.collisonDetector(this)) {
+            this.arena.clear()
             player.score = 0;
             updateScore();
         }
