@@ -56,7 +56,7 @@ class Player {
         this.pos.y++;
         if (collisonDetector(arena, this)) {
             this.pos.y--;
-            merge(arena.gameGrid, this);
+            arena.merge(this);
             this.reset();
             arena.rowClear();
             updateScore();

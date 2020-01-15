@@ -109,15 +109,7 @@ const player = new Player();
 
 // ----------------------------------------------------Game Mechanics
 
-function merge(gameGrid, player) {
-    player.matrix.forEach((row, y) => {
-        row.forEach((value, x) => {
-            if (value !== 0) {
-                arena[y + player.pos.y][x + player.pos.x] = value;
-            }
-        });
-    });
-}
+
 
 function collisonDetector(arena, player) {
     // const [m, o] = [player.matrix, player.pos];
