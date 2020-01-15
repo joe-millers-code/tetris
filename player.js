@@ -37,7 +37,7 @@ class Player {
         if (collisonDetector(arena, this)) {
             this.pos.y--;
             merge(arena, this);
-            playerReset();
+            this.reset();
             rowClear();
             updateScore();
         }
@@ -49,6 +49,19 @@ class Player {
 
         if (this.dropCounter > this.dropInterval) {
             this.drop();
+        }
+    }
+
+    reset() {
+        const pieces = "ILJOTSZ"
+        this.matrix = createPiece(pieces[pieces.length * Math.random() | 0]);
+        this.pos.y = 0;
+        this.pos.x = (arena[0].length / 2 | 0) - (this.matrix[0].length / 2 | 0);
+    
+        if(collisonDetector(arena, this)) {
+            arena.forEach(row => row.fill(0));
+            player.score = 0;
+            updateScore();
         }
     }
 }

@@ -92,7 +92,6 @@ function createPiece(type){
         ]
     }
 }
- //----------------------------------------------------------------------->>>bugs on the I rotate.
 
 //--------------------------------------------Game Controls
 
@@ -134,19 +133,6 @@ function rotate(matrix, dir) {
 
 const player = new Player();
 
-
-function playerReset() {
-    const pieces = "ILJOTSZ"
-    player.matrix = createPiece(pieces[pieces.length * Math.random() | 0]);
-    player.pos.y = 0;
-    player.pos.x = (arena[0].length / 2 | 0) - (player.matrix[0].length / 2 | 0);
-
-    if(collisonDetector(arena, player)) {
-        arena.forEach(row => row.fill(0));
-        player.score = 0;
-        updateScore();
-    }
-}
 
 // ----------------------------------------------------Game Mechanics
 
@@ -210,6 +196,6 @@ function update(time = 0) {
     requestAnimationFrame(update);
 }
 
-playerReset();
+player.reset();
 updateScore();
 update();
